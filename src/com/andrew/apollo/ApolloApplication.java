@@ -15,7 +15,6 @@ import android.app.Application;
 import android.os.StrictMode;
 
 import com.andrew.apollo.cache.ImageCache;
-import com.andrew.apollo.utils.ApolloUtils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

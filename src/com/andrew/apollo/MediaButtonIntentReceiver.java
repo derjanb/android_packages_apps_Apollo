@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.andrew.apollo.ui.activities.HomeActivity;
@@ -27,6 +28,8 @@ import com.andrew.apollo.ui.activities.HomeActivity;
  */
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
+    private static boolean D = true;
+    
     private static final int MSG_LONGPRESS_TIMEOUT = 1;
 
     private static final int LONG_PRESS_DELAY = 1000;
@@ -68,6 +71,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
         final String intentAction = intent.getAction();
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intentAction)) {
+            if (D) Log.d("AMP", "NOISY!");
             final Intent i = new Intent(context, MusicPlaybackService.class);
             i.setAction(MusicPlaybackService.SERVICECMD);
             i.putExtra(MusicPlaybackService.CMDNAME, MusicPlaybackService.CMDPAUSE);
@@ -81,7 +85,8 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
             final int keycode = event.getKeyCode();
             final int action = event.getAction();
             final long eventtime = event.getEventTime();
-
+            if (D) Log.d("AMP", "ACTION_MEDIA_BUTTON " + action + ", " + keycode + ", " + eventtime + ", " + event.getRepeatCount());
+            
             String command = null;
             switch (keycode) {
                 case KeyEvent.KEYCODE_MEDIA_STOP:
@@ -105,42 +110,42 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                     break;
             }
             if (command != null) {
-                if (action == KeyEvent.ACTION_DOWN) {
-                    if (mDown) {
-                        if ((MusicPlaybackService.CMDTOGGLEPAUSE.equals(command) || MusicPlaybackService.CMDPLAY
-                                .equals(command))
-                                && mLastClickTime != 0
-                                && eventtime - mLastClickTime > LONG_PRESS_DELAY) {
-                            mHandler.sendMessage(mHandler.obtainMessage(MSG_LONGPRESS_TIMEOUT,
-                                    context));
-                        }
-                    } else if (event.getRepeatCount() == 0) {
-                        // Only consider the first event in a sequence, not the
-                        // repeat events,
-                        // so that we don't trigger in cases where the first
-                        // event went to
-                        // a different app (e.g. when the user ends a phone call
-                        // by
-                        // long pressing the headset button)
+        	if (mDown  && action == KeyEvent.ACTION_DOWN) {
+        	    if ((MusicPlaybackService.CMDTOGGLEPAUSE.equals(command) || MusicPlaybackService.CMDPLAY
+        		    .equals(command))
+        		    && mLastClickTime != 0
+        		    && eventtime - mLastClickTime > LONG_PRESS_DELAY) {
+        		mHandler.sendMessage(mHandler.obtainMessage(MSG_LONGPRESS_TIMEOUT,
+        			context));
+        	    }
+        	} else if (event.getRepeatCount() == 0) {
+        	    // Only consider the first event in a sequence, not the
+        	    // repeat events,
+        	    // so that we don't trigger in cases where the first
+        	    // event went to
+        	    // a different app (e.g. when the user ends a phone call
+        	    // by
+        	    // long pressing the headset button)
 
-                        // The service may or may not be running, but we need to
-                        // send it
-                        // a command.
-                        final Intent i = new Intent(context, MusicPlaybackService.class);
-                        i.setAction(MusicPlaybackService.SERVICECMD);
-                        if (keycode == KeyEvent.KEYCODE_HEADSETHOOK
-                                && eventtime - mLastClickTime < DOUBLE_CLICK) {
-                            i.putExtra(MusicPlaybackService.CMDNAME, MusicPlaybackService.CMDNEXT);
-                            context.startService(i);
-                            mLastClickTime = 0;
-                        } else {
-                            i.putExtra(MusicPlaybackService.CMDNAME, command);
-                            context.startService(i);
-                            mLastClickTime = eventtime;
-                        }
-                        mLaunched = false;
-                        mDown = true;
-                    }
+        	    // The service may or may not be running, but we need to
+        	    // send it a command.
+        	    if (action == KeyEvent.ACTION_UP) {
+        		final Intent i = new Intent(context, MusicPlaybackService.class);
+        		i.setAction(MusicPlaybackService.SERVICECMD);
+        		if (keycode == KeyEvent.KEYCODE_HEADSETHOOK
+        			&& eventtime - mLastClickTime < DOUBLE_CLICK) {
+        		    i.putExtra(MusicPlaybackService.CMDNAME, MusicPlaybackService.CMDNEXT);
+        		    context.startService(i);
+        		    mLastClickTime = 0;
+        		} else {
+        		    i.putExtra(MusicPlaybackService.CMDNAME, command);
+        		    context.startService(i);
+        		    mLastClickTime = eventtime;
+        		}
+        		mLaunched = false;                	    
+        	    } else {                	    
+        		mDown = true;
+        	    }
                 } else {
                     mHandler.removeMessages(MSG_LONGPRESS_TIMEOUT);
                     mDown = false;

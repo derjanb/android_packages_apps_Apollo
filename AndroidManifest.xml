@@ -15,13 +15,13 @@
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andrew.apollo"
-    android:versionCode="2"
+    android:versionCode="3"
     android:versionName="1.1" >
 
-    <!-- ICS to Jelly Bean -->
+    <!-- ICE_CREAM_SANDWICH to KITKAT -->
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
 
     <!-- Used for caching and creating new playlists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

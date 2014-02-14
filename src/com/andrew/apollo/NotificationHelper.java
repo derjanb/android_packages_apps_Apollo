@@ -11,7 +11,7 @@
 
 package com.andrew.apollo;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,8 +19,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.utils.ApolloUtils;
@@ -31,7 +31,6 @@ import com.andrew.apollo.utils.ApolloUtils;
  *
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-@SuppressLint("NewApi")
 public class NotificationHelper {
 
     /**
@@ -78,6 +77,7 @@ public class NotificationHelper {
     /**
      * Call this to build the {@link Notification}.
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void buildNotification(final String albumName, final String artistName,
             final String trackName, final Long albumId, final Bitmap albumArt,
             final boolean isPlaying) {
